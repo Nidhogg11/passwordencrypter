@@ -1,0 +1,95 @@
+<script>
+
+var resultButton = document.getElementById("getResult")
+
+function getResult() {
+	function xmur3(str) {
+    	for(var i = 0, h = 1779033703 ^ str.length; i < str.length; i++) {
+        	h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+        	h = h << 13 | h >>> 19;
+ 	   } return function() {
+ 	       h = Math.imul(h ^ (h >>> 16), 2246822507);
+ 	       h = Math.imul(h ^ (h >>> 13), 3266489909);
+ 	       return (h ^= h >>> 16) >>> 0;
+ 	   }
+	}
+    
+    function sfc32(a, b, c, d) {
+    	return function() {
+      		a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0; 
+      		var t = (a + b) | 0;
+      		a = b ^ b >>> 9;
+      		b = c + (c << 3) | 0;
+      		c = (c << 21 | c >>> 11);
+      		d = d + 1 | 0;
+      		t = t + d | 0;
+     		c = c + t | 0;
+      		return (t >>> 0) / 4294967296;
+   	 	}
+	}
+    
+    var resultHTML = document.getElementById("result")
+    var useLowerCase = document.getElementById("useLowerCase").checked
+    var useUpperCase = document.getElementById("useUpperCase").checked
+    var useNumbers = document.getElementById("useNumbers").checked
+    var useSymbols = document.getElementById("useSymbols").checked
+    
+    if (!useLowerCase && !useUpperCase && !useNumbers && !useSymbols){
+    	resultHTML.innerHTML = "Select at least one option for your password."
+        return
+    }
+    var nums = "0123456789"
+    var lowerChars = "abcdefghijklnmnopqrstuvwxyz"
+	var upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var symbols = "[]{}*!?.;-_@"
+	var total = ""
+ 	if (useLowerCase) total += lowerChars
+ 	if (useUpperCase) total += upperChars
+ 	if (useNumbers) total += nums
+ 	if (useSymbols) total += symbols
+    
+    var length = Number(document.getElementById("maxLength").value)
+    if (length < 12) length = 12
+    
+	var seed = document.getElementById("seed").value
+    if (seed.length <= 0){
+    	resultHTML.innerHTML = "Enter a seed."
+        return;
+    }
+    
+    seed += length.toString()
+    
+    var index = document.getElementById("index").value
+    if (index > 0) seed += index.toString();
+   
+    var password = ""
+    for (var i = 0; i < length; i++) {
+		var rand = sfc32(xmur3(seed + i + 1)(), xmur3(seed + i + 2)(), xmur3(seed + i + 3)(), xmur3(seed + i + 4)());
+    	var num = rand();
+        var aleatorio = Math.floor(num * total.length)
+        password += total.charAt(aleatorio)
+    }
+    resultHTML.innerHTML = password
+}
+
+</script>
+<label for="seedText" style="font-size: 20; padding: 10">Enter your seed:</label>
+<input id="seed" size="30" style="font-size: 20" value="<uniqueid>_<gameorpagename>_<specialindex>"><br>
+<label for="maxLengthText" style="font-size: 20; padding: 10">Max Length:</label>
+<input id="maxLength" type="number" min="12" max="35" style="font-size: 20" value="12"><br><br>
+<label for="indexLength" style="font-size: 20; padding: 10">Password Index:</label>
+<input id="index" type="number" min="0" style="font-size: 20" value="0"><br><br>
+
+<input type="checkbox" id="useLowerCase" name="lowerCaseChars" checked="true">
+<label for="lowerCaseChars">Use lowercase characters (abcde...)</label><br>
+<input type="checkbox" id="useUpperCase" name="upperCaseChars" checked="true">
+<label for="upperCaseChars">Use uppercase characters (ABCDE...)</label><br>
+<input type="checkbox" id="useNumbers" name="useNumbers" checked="true">
+<label for="useNumbers">Use numbers (0123456789)</label><br>
+<input type="checkbox" id="useSymbols" name="useSymbols" checked="true">
+<label for="useSymbols">Use symbols ([]{}*!?.;-_)</label><br><br>
+
+<button onclick="getResult()">
+<label id="getResult" for="resultText" style="font-size: 15; padding: 10">Get Result</label>
+</button><br><br>
+<label id="result" style="font-size: 15; padding: 10">Empty Password.</label>
